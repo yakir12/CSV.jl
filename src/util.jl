@@ -14,7 +14,7 @@ end
 @inline function tryparsenext_base10_digit(T,str,i, len)
     R = Nullable{T}
     i > len && @goto error
-    c,ii = next(str,i)
+    @inbounds c,ii = next(str,i)
     '0' <= c <= '9' || @goto error
     return R(c-'0'), ii
 
@@ -89,5 +89,9 @@ end
         i = ii
     end
     return Nullable{Int}(0), i
+end
+
+@inline function iswhitespace(c::Char)
+    c == ' ' || c == '\t'
 end
 
