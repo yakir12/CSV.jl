@@ -89,6 +89,8 @@ end
   , delim::Char=','
 )
 
+fieldtype{T}(::Field{T}) = T
+
 function tryparsenext{T}(f::Field{T}, str, i, len)
     R = Nullable{T}
     i > len && @goto error
