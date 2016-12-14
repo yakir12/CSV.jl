@@ -43,8 +43,10 @@ end
     c, ii = next(str, i)
     if c == '-'
         return R(-1), ii
+    elseif c == '+'
+        return R(1), ii
     else
-        '0' <= c <= '9' ? (R(1), i) : (R(), i)
+        return '0' <= c <= '9' ? (R(1), i) : (R(), i)
     end
 end
 
