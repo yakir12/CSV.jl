@@ -24,3 +24,22 @@ end
         R(), i
     end
 end
+
+@generated function tryparsesetindex{N,To}(r::Record{NTuple{N},To}, str, i, len, columns::Tuple, col)
+    quote
+        R = Nullable{Void}
+        i > len && @goto error
+        state = i
+
+        Base.@nexprs $N j->begin
+            val_j, state = @chk1 tryparsenext(r.fields[j], str, i, len)
+            columns[j][col] = val_j
+        end
+
+        @label done
+        return R(nothing), i
+
+        @label error
+        R(), i
+    end
+end
