@@ -4,7 +4,8 @@ end
 
 function Record{T<:Tuple}(t::T)
     To = Tuple{map(fieldtype, t)...}
-    Record{T,To}(t)
+    #Tov = Tuple{map(s->Vector{s},map(fieldtype, t))...}
+    Record{T, To}(t)
 end
 
 @generated function tryparsenext{N,To}(r::Record{NTuple{N},To}, str, i, len)
