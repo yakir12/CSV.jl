@@ -39,31 +39,32 @@ end
 
 # internal method for getting a cell value
 @inline function getcell(f::File, ::Type{T}, col::Int, row::Int) where {T}
-    ind = metaind(row)
+    ind = metaind(mult(T), row)
     @inbounds offlen = gettape(f, col)[ind]
     missingvalue(offlen) && return missing
-    return getvalue(Base.nonmissingtype(T), f, ind, offlen, col)
+    vind = valind(mult(T), row)
+    return getvalue(Base.nonmissingtype(nonuser(T)), f, vind, offlen, col, T)
 end
 
-function getvalue(::Type{T}, f, indexoffset, offlen, col) where {T}
-    @inbounds x = reinterp_func(T)(gettape(f, col)[indexoffset + 1])
+function getvalue(::Type{T}, f, indexoffset, offlen, col, TT) where {T}
+    @inbounds x = reinterp_func(T)(gettape(f, col)[indexoffset])
     return x
 end
 
-function getvalue(::Type{Float64}, f, indexoffset, offlen, col)
-    @inbounds x = gettape(f, col)[indexoffset + 1]
-    return ifelse(intvalue(offlen), Float64(int64(x)), float64(x))
+function getvalue(::Type{Float64}, f, indexoffset, offlen, col, T)
+    @inbounds x = gettape(f, col)[indexoffset]
+    return ifelse(intvalue(mult(T), offlen), Float64(int64(x)), float64(x))
 end
 
-getvalue(::Type{Missing}, f, indexoffset, offlen, col) = missing
+getvalue(::Type{Missing}, f, indexoffset, offlen, col, T) = missing
 
-function getvalue(::Type{PooledString}, f, indexoffset, offlen, col)
-    @inbounds x = gettape(f, col)[indexoffset + 1]
+function getvalue(::Type{PooledString}, f, indexoffset, offlen, col, T)
+    @inbounds x = gettape(f, col)[indexoffset]
     @inbounds str = getrefs(f, col)[x]
     return str
 end
 
-function getvalue(::Type{String}, f, indexoffset, offlen, col)
+function getvalue(::Type{String}, f, indexoffset, offlen, col, T)
     s = PointerString(pointer(getbuf(f), getpos(offlen)), getlen(offlen))
     return escapedvalue(offlen) ? unescape(s, gete(f)) : String(s)
 end

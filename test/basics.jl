@@ -206,7 +206,7 @@ df = CSV.read(IOBuffer("x\na\n\n"), pool=true)
 
 # catg => string
 df = CSV.read(IOBuffer("x\na\nb\na\nb\na\nb\na\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nn\nm\no\np\nq\nr\n"), pool=0.5)
-@test typeof(df.x) == CSV.Column{String, String}
+@test typeof(df.x) <: CSV.Column{String, String}
 
 # a few corner cases for escape strings
 df = CSV.read(IOBuffer("\"column name with \"\" escape character inside\"\n1\n"))

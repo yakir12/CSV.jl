@@ -99,7 +99,8 @@ const MISSING_BIT = 0x8000000000000000
 missingvalue(x::UInt64) = (x & MISSING_BIT) == MISSING_BIT
 
 const INT_BIT = 0x4000000000000000
-intvalue(x::UInt64) = (x & INT_BIT) == INT_BIT
+intvalue(::Val{2}, x::UInt64) = (x & INT_BIT) == INT_BIT
+intvalue(::Val{1}, x::UInt64) = false
 
 const ESCAPE_BIT = 0x2000000000000000
 escapedvalue(x::UInt64) = (x & ESCAPE_BIT) == ESCAPE_BIT
@@ -362,3 +363,19 @@ Base.setindex!(a::AtomicVector, x, i::Int) = setindex!(a.A[i], x)
 
 incr!(a::Vector, i) = (a[i] += 1)
 incr!(a::AtomicVector{T}, i) where {T} = Threads.atomic_add!(a.A[i], convert(T, 1)) + 1
+
+
+
+
+struct TVector{T, S} <: AbstractVector{T}
+    x::Vector{S}
+end
+
+Base.size(a::TVector) = size(a.x)
+Base.IndexStyle(::Type{T}) where {T <: TVector} = Base.IndexLinear()
+
+@inline function Base.getindex(A::TVector{T}, i::Int) where {T}
+    @boundscheck checkbounds(A, i)
+    @inbounds x = Core.bitcast(T, A.x[i])
+    return x
+end
