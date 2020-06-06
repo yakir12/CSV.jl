@@ -396,6 +396,9 @@ df = CSV.read(IOBuffer("h1234567890123456\t"^2262 * "lasthdr\r\n" *"dummy dummy 
 @test size(df) == (10, 2263)
 @test all(x -> eltype(x) == Float64, eachcol(df))
 
+# Date constructor throws which breaks CSV parsing error handling flow
+f = CSV.File(IOBuffer("date\n2020-05-05\n2020-05-32"))
+
 # multiple dateformats
 f = CSV.File(IOBuffer("time,date,datetime\n10:00:00.0,04/16/2020,2020-04-16 23:14:00\n"), dateformats=Dict(2=>"mm/dd/yyyy", 3=>"yyyy-mm-dd HH:MM:SS"))
 @test length(f) == 1
